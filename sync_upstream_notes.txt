@@ -1,0 +1,9 @@
+Run these commands whenever you want to sync with upstream:
+
+git fetch upstream
+git checkout main
+git merge upstream/main
+git push origin main
+git checkout project-management-stakeholder
+git rebase main
+git push --force-with-lease origin project-management-stakeholder
