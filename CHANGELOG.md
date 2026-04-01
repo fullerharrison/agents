@@ -7,13 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Analyst agent** — Knowledge management agent that ingests documents, URLs, completed tasks, and codebase patterns into a structured `docs/knowledge/` learning base. Operates in three modes: Ingest (raw info → cataloged entries), Synthesize (entries → analysis docs), Extract (knowledge → tasks/skills/instructions). Delegates to Explorer (codebase), Researcher (web/URLs), and Builder (file creation). Uses Opus model.
+- **`knowledge-management` skill** — Knowledge base organization standards: entry format with source/date/topic/tags/confidence, topic taxonomy rules, tag conventions, ingestion decision tree, synthesis triggers, catalog maintenance checklist.
+- **Planner agent** — Strategic project management agent for roadmaps, epic breakdown, user stories (INVEST criteria), backlog prioritization (RICE scoring), effort estimation (T-shirt sizing), and status reporting. Writes only to `.tasks/` directory. Uses Opus model. Delegates to Explorer for codebase research.
+- **Triager agent** — Quick intake agent for bugs, features, and ideas. Assesses severity, priority (RICE scoring), and complexity. Checks for duplicate/overlapping work in existing `.tasks/`. Routes to appropriate workflow (Planner, Explorer, or Conductor). Read-only, uses Sonnet model.
+- **Releaser agent** — Release automation agent for changelogs (Keep a Changelog format), semantic version bumps, release notes generation, annotated git tags, and deployment checklists. Scans git log since last tag to categorize changes. Uses Sonnet model.
+- **`requirements` skill** — User story writing with INVEST criteria, acceptance criteria in Given/When/Then format, epic decomposition (Epic → Feature → Story → Task), scope boundary definition. Includes anti-pattern tables and quality checklist.
+- **`estimation` skill** — T-shirt sizing framework (XS–XL) with codebase-derived heuristics, complexity factor checklist, risk multipliers (unfamiliar tech: 2x, no tests: 1.5x, external deps: 2x), and cone of uncertainty guidance.
+- **`prioritization` skill** — RICE framework with scoring guide, MoSCoW method, Impact/Effort matrix (Quick Wins / Big Bets / Fill-Ins / Money Pits), dependency mapping, work sequencing rules, and backlog grooming checklist.
+- **`release-management` skill** — Semantic versioning decision tree, Keep a Changelog format with rules, release checklist, release notes template, pre-release versioning conventions (alpha/beta/rc).
+- **`retrospective` skill** — "What went well / What didn't / Action items" framework, 5 Whys root cause analysis, pattern detection across completed tasks, action item format with triggers and success metrics.
+- **`risk-assessment` skill** — Risk identification across 6 categories (technical, integration, dependency, data, security, operational), probability × impact matrix (3×3), mitigation strategies (avoid/reduce/transfer/accept), dependency risk scoring, risk register template.
+- **`github-sync` skill** — Optional GitHub integration layer for syncing `.tasks/` state to GitHub Issues, PRs, and Projects. Uses `gh` CLI when available, degrades to preview mode when not. `.tasks/` remains primary source of truth.
+- **`project-management` instructions** — PM conventions for `.tasks/` files: status emoji reference, task naming format, priority/size labels, cross-reference syntax, phase table and user story format standards.
+- **CLI wrappers** — `a-planner`, `a-triager`, `a-releaser` for Claude Code usage.
+
 ### Changed
 
 - **Builder emits structured delivery report at phase and full-implementation completion** — "After Completing a Phase" and "Final Completion" sections now specify a `📦 Phase [N]` / `✅ All phases complete` template with Verification status, Changes (before → after), Files, and Try it. Step 3 item 6 updated to reference the delivery report template instead of a bare verification summary.
-
-### Changed
-
 - **Conductor presents "What Changed" summary before commit checkpoint** — Step 2c Builder invocation prompt now requests a user-facing impact statement ("What Changed" — one plain-English sentence of what the user can now do/see). Step 2d now presents the impact summary (what changed, files changed, review status) before offering [Commit]/[Verify]/[Abort] options.
+- **Conductor now supports Planner, Triager, and Releaser** — Added all three to `copilot.agents` and CC `Task()` list. Agent capabilities table expanded. Completion step now suggests "Prepare Release" and "Run Retrospective". New optional workflow sections: Pre-Workflow Triage, Strategic Planning, and Release Preparation.
+- **Explorer gains `requirements` skill** — CC skills list now includes `requirements` so Explorer can write INVEST-compliant user stories when creating phase plans.
+- **Reviewer gains `risk-assessment` skill** — CC skills list now includes `risk-assessment` so Reviewer can flag risks during review passes.
 
 ### Removed
 

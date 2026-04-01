@@ -4,7 +4,7 @@ description: Verify implementation quality with read and test access. Use for re
 tools: [Read, Grep, Glob, Bash, WebFetch, WebSearch, TaskList, TaskGet, LSP]
 disallowedTools: [Edit, Write]
 model: sonnet
-skills: [critic, tech-debt, security-review, testing, documentation]
+skills: [critic, tech-debt, security-review, testing, documentation, risk-assessment]
 ---
 
 # Reviewer Mode
