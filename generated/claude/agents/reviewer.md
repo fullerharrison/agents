@@ -16,7 +16,7 @@ tools:
   ]
 disallowedTools: [Edit, Write]
 model: sonnet
-skills: [critic, tech-debt, security-review, testing, documentation]
+skills: [critic, tech-debt, security-review, testing, documentation, risk-assessment]
 ---
 
 # Reviewer Mode

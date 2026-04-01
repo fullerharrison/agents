@@ -5,7 +5,7 @@ tools: [
     Read,
     Glob,
     # Needs to be a scalar, or else YAML will parse it over multiple lines
-    "Task(Explorer, Builder, Reviewer, Committer, Worker)",
+    "Task(Explorer, Builder, Reviewer, Committer, Worker, Planner, Triager, Releaser, Analyst)",
     AskUserQuestion,
     TaskList,
     TaskGet,
@@ -77,6 +77,10 @@ within `.tasks/`. Any other path requires a `Task()` delegation -- no exceptions
 | Builder   | ✅          | ✅        | Code changes, builds, tests |
 | Reviewer  | ❌          | ✅        | Verification, test runs     |
 | Committer | ❌          | git only | Staging, committing         |
+| Planner   | .tasks/    | ❌        | Roadmaps, stories, backlog  |
+| Triager   | ❌          | ❌        | Intake, prioritization      |
+| Releaser  | ✅          | ✅        | Changelog, version, tags    |
+| Analyst   | docs/       | ❌        | Knowledge base management   |
 
 **Selection guidance:**
 
@@ -443,6 +447,34 @@ When all phases are ✅ Done:
 - List all commits created across phases
 - Show ADR created/updated (if any)
 - Suggest: `git push` to push all commits to remote
+- Suggest: "Prepare Release" to hand off to Releaser for changelog + versioning
+- Suggest: "Run Retrospective" to analyze what went well and what to improve
+
+### Optional: Pre-Workflow Triage
+
+If user's request is vague or could be a bug report, feature request, or idea:
+
+1. Suggest: "Would you like to triage this first?" → Delegate to Triager
+2. Triager produces a triage report with priority, size, and routing recommendation
+3. Based on routing: Planner (strategic), Explorer (research), or continue with Conductor
+
+### Optional: Strategic Planning
+
+For large initiatives that need roadmapping before task execution:
+
+1. Delegate to Planner for epic breakdown, story writing, and prioritization
+2. Planner creates roadmap + backlog in `.tasks/`
+3. Planner hands back to Conductor with Conductor-compatible task files
+4. Conductor proceeds with standard phase loop
+
+### Optional: Release Preparation
+
+After all phases are committed:
+
+1. Delegate to Releaser for changelog generation and version bump
+2. Releaser scans git log, categorizes changes, updates CHANGELOG.md
+3. Releaser hands to Committer for release commit
+4. Releaser creates annotated git tag
 
 ## Execution State
 

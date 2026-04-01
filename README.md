@@ -14,9 +14,9 @@ A minimal framework for AI-assisted coding with phase-based workflows, auto-acti
 
 | Component        | Count | What It Does                                                              |
 | ---------------- | ----- | ------------------------------------------------------------------------- |
-| **Agents**       | 7     | Phase-based workflow with orchestration (4 core + Conductor + 2 internal) |
-| **Skills**       | 14    | Auto-activate based on your prompts (debug, mentor, testing, etc.)        |
-| **Instructions** | 5     | File-type coding standards that load automatically                        |
+| **Agents**       | 11    | Phase-based workflow with orchestration (8 core + Conductor + 2 internal) |
+| **Skills**       | 22    | Auto-activate based on your prompts (debug, mentor, testing, etc.)        |
+| **Instructions** | 6     | File-type coding standards that load automatically                        |
 
 ```bash
 git clone https://github.com/mcouthon/agents.git
@@ -61,15 +61,29 @@ Explorer ──→ Builder ──→ Reviewer ──→ Committer
         Explorer ──→ Builder ──→ Reviewer ──→ Committer
 ```
 
+**Project management workflow** (full lifecycle with planning and release):
+
+```
+Triager ──→ Planner ──→ Conductor ──→ ... ──→ Releaser
+  │            │            │                     │
+  │            │            └── (standard loop)   └── Changelog + Tag
+  │            └── Roadmap, Stories, Backlog
+  └── Triage, RICE scoring, Routing
+```
+
 Conductor automates multi-phase workflows with pause points for user approval.
 
 | Agent         | Purpose                       | Tool Access       | Key Handoffs               |
 | ------------- | ----------------------------- | ----------------- | -------------------------- |
 | **Conductor** | Automate multi-phase workflow | Read + Agent      | (coordinates other agents) |
 | **Explorer**  | Research + create plans       | Read + Task Write | Builder                    |
+| **Planner**   | Roadmaps, stories, backlog    | Read + Task Write | Conductor, Triager         |
+| **Triager**   | Intake, triage, routing       | Read-only         | Planner, Explorer          |
 | **Builder**   | Execute planned changes       | Full access       | Reviewer, Committer        |
 | **Reviewer**  | Verify implementation quality | Read + Test       | Commit Changes, Fix Issues |
 | **Committer** | Create semantic commits       | Git + Read        | Push                       |
+| **Releaser**  | Changelogs, versions, tags    | Edit + Terminal   | Reviewer, Committer        |
+| **Analyst**   | Knowledge base management     | Read + Write      | Explorer, Researcher       |
 
 **Internal agents (not user-invokable):** Researcher (read + web), Worker (full access) — used by other agents for context-isolated subtasks.
 
@@ -104,6 +118,17 @@ Each agent has buttons that trigger common next steps **without leaving your cur
 | **Committer** | Review Commits    | Show commits with git log                 |
 |               | Amend Last Commit | Amend the last commit with staged changes |
 |               | Push              | Push commits to remote                    |
+| **Planner**   | Start Implementation | Hand off roadmap to Conductor          |
+|               | Triage New Work   | Assess incoming request via Triager       |
+|               | Prioritize Backlog| Re-score backlog with RICE framework      |
+|               | Show Roadmap      | Display current project status            |
+| **Triager**   | Plan This         | Route to Planner for strategic planning   |
+|               | Explore Codebase  | Deep-dive into affected code              |
+|               | Start Building    | Skip to Conductor for implementation      |
+| **Releaser**  | Review Release    | Audit release contents via Reviewer       |
+|               | Commit Release    | Commit changelog + version via Committer  |
+|               | Create Tag        | Create annotated git tag                  |
+|               | Show Release Status| Preview next release contents            |
 
 **Key benefit**: These buttons keep your context and chat history. No reset, no re-explaining.
 
@@ -113,21 +138,28 @@ Each agent has buttons that trigger common next steps **without leaving your cur
 
 Skills activate automatically based on what you say:
 
-| You Say                       | Skill Activated   |
-| ----------------------------- | ----------------- |
-| "This test is failing"        | `debug`           |
-| "Find code smells"            | `tech-debt`       |
-| "Clean up dead code"          | `tech-debt`       |
-| "Document the architecture"   | `architecture`    |
-| "Teach me how this works"     | `mentor`          |
-| "Challenge my approach"       | `critic`          |
-| "Create a Makefile"           | `makefile`        |
-| "Build a dashboard UI"        | `design`          |
-| "Security review this PR"     | `security-review` |
-| "Write tests for this"        | `testing`         |
-| "Write a feature file"        | `bdd`             |
-| "Add docs for this API"       | `documentation`   |
-| "Check documentation quality" | `documentation`   |
+| You Say                       | Skill Activated      |
+| ----------------------------- | -------------------- |
+| "This test is failing"        | `debug`              |
+| "Find code smells"            | `tech-debt`          |
+| "Clean up dead code"          | `tech-debt`          |
+| "Document the architecture"   | `architecture`       |
+| "Teach me how this works"     | `mentor`             |
+| "Challenge my approach"       | `critic`             |
+| "Create a Makefile"           | `makefile`           |
+| "Build a dashboard UI"        | `design`             |
+| "Security review this PR"     | `security-review`    |
+| "Write tests for this"        | `testing`            |
+| "Write a feature file"        | `bdd`                |
+| "Add docs for this API"       | `documentation`      |
+| "Write a user story"          | `requirements`       |
+| "How big is this task?"       | `estimation`         |
+| "Prioritize the backlog"      | `prioritization`     |
+| "Prepare a release"           | `release-management` |
+| "Run a retrospective"         | `retrospective`      |
+| "What are the risks?"         | `risk-assessment`    |
+| "Sync to GitHub"              | `github-sync`        |
+| "Add to knowledge base"       | `knowledge-management` |
 
 No manual switching required—just ask naturally.
 
@@ -264,7 +296,7 @@ $ claude
 
 **Note:** Claude Code supports tool restrictions, model selection, and skills. The only VS Code feature not available in Claude Code is handoff buttons — use the next agent manually when ready.
 
-**Shell helpers** _(optional)_: Run `./install.sh helpers` to add `a-explorer`, `a-builder`, `a-reviewer`, `a-committer`, and `a-conductor` commands to your PATH. Each supports `a-explorer`, `a-explorer continue` (auto-detect task), and `a-explorer "prompt"` modes. See [cc-quickstart.md](./docs/cc-quickstart.md) for details.
+**Shell helpers** _(optional)_: Run `./install.sh helpers` to add `a-explorer`, `a-builder`, `a-reviewer`, `a-committer`, `a-conductor`, `a-planner`, `a-triager`, `a-releaser`, and `a-analyst` commands to your PATH. Each supports `a-explorer`, `a-explorer continue` (auto-detect task), and `a-explorer "prompt"` modes. See [cc-quickstart.md](./docs/cc-quickstart.md) for details.
 
 ---
 
@@ -344,9 +376,9 @@ Explorer persists state to `.tasks/[NNN]-[task-name]/`:
 
 ```
 templates/                # SOURCE OF TRUTH — edit these
-├── agents/               #   7 agent templates
-├── skills/               #   14 skill templates
-└── instructions/         #   5 instruction templates
+├── agents/               #   11 agent templates
+├── skills/               #   22 skill templates
+└── instructions/         #   6 instruction templates
 
 generated/                # GENERATED — do not edit
 ├── copilot/              #   Copilot output
