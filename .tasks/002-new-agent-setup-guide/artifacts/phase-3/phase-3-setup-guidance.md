@@ -469,25 +469,28 @@ Regenerate outputs when you:
 
 **Recommended approach: Full regeneration**
 
+**macOS/Linux** (requires `make`):
 ```bash
 make
 ```
 
-This regenerates all agents, skills, and instructions for both Copilot and CC platforms. Output files are written to `generated/`.
+**Windows** (`make` is not available by default — use `npm` instead):
+```powershell
+npm run generate
+```
 
-**Alternative commands:**
+Both regenerate all agents, skills, and instructions for both Copilot and CC platforms into `generated/`.
+
+**Platform-specific generation:**
 
 ```bash
-# Copilot platform only
-make copilot
+# macOS/Linux
+make copilot         # Copilot only
+make cc              # Claude Code only
 
-# CC platform only
-make cc
-
-# Or use npm scripts (if make is not available)
-npm run generate          # equals: make
-npm run generate:copilot  # equals: make copilot
-npm run generate:cc       # equals: make cc
+# Windows (PowerShell)
+npm run generate:copilot
+npm run generate:cc
 ```
 
 **Citation:** Phase 2 Req. 4.2–4.5 (Generation Commands, Alternatives, Workflow Summary).
@@ -585,7 +588,21 @@ This script copies generated files to the platform-specific discovery directorie
 - **Copilot:** Files copied to `~/.copilot/agents/`, `~/.copilot/instructions/`, `~/.copilot/skills/`
 - **Claude Code:** Files copied to `~/.claude/agents/`, `~/.claude/rules/`, `~/.claude/skills/`
 
-**Windows note:** On Windows, use `bash ./install.sh` or run the script from WSL.
+**Windows — use the PowerShell installer instead of `install.sh`:**
+
+`install.sh` uses zsh-specific syntax (`*(N)` globs) and will fail under `bash`. More critically, running it via WSL writes files to the WSL Linux home (`/home/user/`), **not** the Windows profile that VS Code reads (`C:\Users\<you>\.copilot\`). Use the dedicated Windows script instead:
+
+```powershell
+pwsh -File scripts\install-windows.ps1
+```
+
+This script generates directly from templates and copies to the correct Windows profile paths (`%USERPROFILE%\.copilot\` and `%USERPROFILE%\.claude\`). It also configures VS Code `settings.json` automatically.
+
+**If you must use `install.sh` on Windows (WSL):** Run it with `wsl -- zsh ./install.sh`, not `bash ./install.sh`. But note files still land in the WSL home — copy them manually afterwards:
+
+```powershell
+copy-item -Recurse -Force "\\wsl$\Ubuntu\home\<user>\.copilot\*" "$env:USERPROFILE\.copilot\"
+```
 
 **Citation:** Phase 2 Req. 4.4 (Installation Command); Phase 2 Req. 5.1 (Install Destination Paths).
 
@@ -610,18 +627,25 @@ This script copies generated files to the platform-specific discovery directorie
 
 ### Uninstall or Manual Install
 
-**Uninstall:**
+**Uninstall (macOS/Linux):**
 ```bash
 ./install.sh uninstall
 ```
 
-**Manual install (if script fails):** Copy files directly:
-```bash
-# For Copilot agents
-cp generated/copilot/agents/*.md ~/.copilot/agents/
+**Manual install (Windows PowerShell — always works):**
+```powershell
+pwsh -File scripts\install-windows.ps1
+```
 
-# For Claude Code agents
-cp generated/claude/agents/*.md ~/.claude/agents/
+**Manual copy (fallback):**
+```powershell
+$src = ".\generated"; $w = $env:USERPROFILE
+Copy-Item -Recurse -Force "$src\copilot\agents\*"       "$w\.copilot\agents\"
+Copy-Item -Recurse -Force "$src\copilot\skills\*"       "$w\.copilot\skills\"
+Copy-Item -Recurse -Force "$src\copilot\instructions\*" "$w\.copilot\instructions\"
+Copy-Item -Recurse -Force "$src\claude\agents\*"        "$w\.claude\agents\"
+Copy-Item -Recurse -Force "$src\claude\skills\*"        "$w\.claude\skills\"
+Copy-Item -Recurse -Force "$src\claude\rules\*"         "$w\.claude\rules\"
 ```
 
 **Citation:** Phase 2 Req. 4.4 (Installation Options).
@@ -672,13 +696,64 @@ cp generated/claude/agents/*.md ~/.claude/agents/
 
 ### Installation Problems
 
+**Problem:** `bash ./install.sh` fails with `$'\r': command not found` or `syntax error near unexpected token '('`
+
+**Cause:** Two issues combined — (1) `install.sh` was checked out with Windows CRLF line endings, and (2) it uses zsh-specific `*(N)` null-glob syntax that bash rejects.
+
+**Fix (permanent):**
+1. Ensure `.gitattributes` declares `*.sh text eol=lf` — this prevents CRLF on future checkouts.
+2. Strip CRLF from currently checked-out files:
+```powershell
+Get-ChildItem -Recurse -Filter "*.sh" | ForEach-Object {
+    $p = $_.FullName; $b = [IO.File]::ReadAllBytes($p)
+    if ($b[0] -eq 0xEF -and $b[1] -eq 0xBB -and $b[2] -eq 0xBF) { $b = $b[3..($b.Length-1)] }
+    $t = [Text.Encoding]::UTF8.GetString($b) -replace "`r`n","`n" -replace "`r","`n"
+    [IO.File]::WriteAllText($p, $t, (New-Object Text.UTF8Encoding($false)))
+}
+```
+3. On Windows, always use `wsl -- zsh ./install.sh` (not `bash`).
+4. Better: use `pwsh -File scripts\install-windows.ps1` — no WSL dependency at all.
+
+---
+
+**Problem:** Install succeeds but agents not in `C:\Users\<you>\.copilot\agents\`
+
+**Cause:** WSL's `$HOME` resolves to the Linux home (`/home/<user>/`), not the Windows profile. Files land inside WSL, invisible to VS Code on Windows.
+
+**Fix:** Use the PowerShell installer:
+```powershell
+pwsh -File scripts\install-windows.ps1
+```
+Or manually copy from the generated folder (does not require WSL at all):
+```powershell
+$src = ".\generated"; $w = $env:USERPROFILE
+Copy-Item -Recurse -Force "$src\copilot\agents\*" "$w\.copilot\agents\"
+```
+
+---
+
 **Problem:** Agent does not appear in VS Code Copilot agent picker after install
 
 **Solution:**
-1. Verify `~/.copilot/agents/` contains your agent file
-2. Restart VS Code completely (close and reopen)
-3. Check VS Code settings: settings.json should include agent paths (configured by installer)
-4. Run `./install.sh helpers` to see debug information
+1. Verify `C:\Users\<you>\.copilot\agents\` (Windows) or `~/.copilot/agents/` (macOS/Linux) contains your agent file.
+2. Confirm VS Code `settings.json` includes:
+```json
+"chat.agentFilesLocations": { "~/.copilot/agents": true },
+"chat.instructionsFilesLocations": { "~/.copilot/instructions": true }
+```
+The PowerShell installer sets these automatically. To set manually:
+```powershell
+node -e "
+const fs=require('fs'),p=require('path');
+const s=p.join(process.env.APPDATA,'Code','User','settings.json');
+const j=JSON.parse(fs.readFileSync(s,'utf8'));
+j['chat.agentFilesLocations']=Object.assign({},j['chat.agentFilesLocations']||{},{'~/.copilot/agents':true});
+j['chat.instructionsFilesLocations']=Object.assign({},j['chat.instructionsFilesLocations']||{},{'~/.copilot/instructions':true});
+fs.writeFileSync(s,JSON.stringify(j,null,2));
+console.log('Updated '+s);
+"
+```
+3. Reload VS Code: `Ctrl+Shift+P` → **Developer: Reload Window**.
 
 **Citation:** Phase 1 Evidence (VS Code discovery, install.sh helpers option).
 
