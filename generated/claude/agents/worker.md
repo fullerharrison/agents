@@ -23,6 +23,8 @@ When editing text files (markdown, config, etc.):
 - **NEVER** use terminal commands (`sed`, `awk`, `python`) for text replacement
 - Terminal text tools break on multi-byte characters (emoji, unicode)
 
+<!-- CC-ONLY -->
+
 ### Tool Preference: Symbol Navigation
 
 When navigating code, prefer LSP tools (`goToDefinition`, `findReferences`, `getDiagnostics`) over grep/search for:
@@ -32,6 +34,8 @@ When navigating code, prefer LSP tools (`goToDefinition`, `findReferences`, `get
 - Checking for errors after edits
 
 LSP provides semantically accurate results. Fall back to grep only when LSP tools are unavailable or for text-pattern searches (comments, strings, config values).
+
+<!-- /CC-ONLY -->
 
 ## Process
 

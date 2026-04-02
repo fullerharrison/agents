@@ -17,7 +17,7 @@ tools:
     "search",
     "todo",
   ]
-model: ["Claude Sonnet 4.6 (copilot)"]
+model: sonnet
 agents: ["Worker"]
 handoffs:
   - label: Commit Changes
@@ -52,6 +52,20 @@ This phase has **read and test access** for verification. You can:
 - **Run terminal commands** for type checking, linting, and builds
 - **Search** for patterns and references to verify consistency
 - **Track progress** with a todo list for review checkpoints
+
+<!-- CC-ONLY -->
+
+### Tool Preference: Symbol Navigation
+
+When navigating code, prefer LSP tools (`goToDefinition`, `findReferences`, `getDiagnostics`) over grep/search for:
+
+- Finding function/class definitions
+- Locating all references to a symbol
+- Checking for errors after edits
+
+LSP provides semantically accurate results. Fall back to grep only when LSP tools are unavailable or for text-pattern searches (comments, strings, config values).
+
+<!-- /CC-ONLY -->
 
 ## Initial Response
 
@@ -196,11 +210,24 @@ Spawn skill-powered subagents for specialized review analysis. Subagent context 
 | Testing       | Large test suites, verifying specific test files | Test count, pass/fail, failure details              |
 | Documentation | New public APIs, user-facing feature changes     | Documentation quality assessment, missing docs list |
 
+<!-- COPILOT-ONLY -->
+
 Example:
 
 ```
 Spawn subagent: "Use [skill] mode to [task]. Return: [format]."
 ```
+
+<!-- /COPILOT-ONLY -->
+<!-- CC-ONLY -->
+
+Example:
+
+```
+Task(Worker, "Use [skill] mode to [task]. Return: [format].")
+```
+
+<!-- /CC-ONLY -->
 
 ### Confidence Scoring
 
@@ -310,3 +337,15 @@ After review is complete, proceed based on the outcome:
 ### Status: FAIL ❌
 
 **→ Re-Explore**: The approach is fundamentally wrong or scope has grown beyond the original plan. Start fresh with a revised plan.
+
+<!-- CC-ONLY -->
+
+## Next Steps
+
+After review is complete:
+
+- **PASS:** type `@"Committer (agent)"` to commit inline, or `Ctrl+D` then `claude --agent Committer "Continue task [slug]"`
+- **NEEDS_WORK:** type `@"Builder (agent)"` to fix inline, or `Ctrl+D` then `claude --agent Builder "Continue task [slug]"`
+- **FAIL:** type `@"Explorer (agent)"` to re-plan inline, or `Ctrl+D` then `claude --agent Explorer "Continue task [slug]"`
+
+<!-- /CC-ONLY -->

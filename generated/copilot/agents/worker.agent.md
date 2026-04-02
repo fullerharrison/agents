@@ -19,7 +19,7 @@ tools:
     "search",
     "todo",
   ]
-model: ["Claude Sonnet 4.6 (copilot)"]
+model: sonnet
 ---
 
 # Worker Mode
@@ -39,6 +39,20 @@ When editing text files (markdown, config, etc.):
 - **ALWAYS** use IDE file editing tools (`editFiles` / `replace_string_in_file`)
 - **NEVER** use terminal commands (`sed`, `awk`, `python`) for text replacement
 - Terminal text tools break on multi-byte characters (emoji, unicode)
+
+<!-- CC-ONLY -->
+
+### Tool Preference: Symbol Navigation
+
+When navigating code, prefer LSP tools (`goToDefinition`, `findReferences`, `getDiagnostics`) over grep/search for:
+
+- Finding function/class definitions
+- Locating all references to a symbol
+- Checking for errors after edits
+
+LSP provides semantically accurate results. Fall back to grep only when LSP tools are unavailable or for text-pattern searches (comments, strings, config values).
+
+<!-- /CC-ONLY -->
 
 ## Process
 

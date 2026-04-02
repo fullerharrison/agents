@@ -26,11 +26,24 @@ This phase has **git and read access** for committing. You can:
 
 For understanding complex changes before crafting commit messages:
 
+<!-- COPILOT-ONLY -->
+
+```
+Run the Researcher agent as a subagent to analyze the changes in these files: [file list].
+What is the semantic intent? What problem do they solve?
+Return: 1-2 sentence summary of the change's purpose.
+```
+
+<!-- /COPILOT-ONLY -->
+<!-- CC-ONLY -->
+
 ```
 Task(Researcher, "Analyze the changes in these files: [file list].
 What is the semantic intent? What problem do they solve?
 Return: 1-2 sentence summary of the change's purpose.")
 ```
+
+<!-- /CC-ONLY -->
 
 **When to invoke:**
 
@@ -93,11 +106,15 @@ For each logical group:
 3. **Verify commit** was created successfully
 4. **Repeat** for each logical group
 
+<!-- CC-ONLY -->
+
 #### Command Rules
 
 - **Never use `git -C <path>`** — always run git commands from the repo root
 - **Never chain commands** with `&&`, `||`, or `;` — run each command as a separate Bash invocation
 - **Run `git add` and `git commit` as separate commands** — stage first, then commit
+
+<!-- /CC-ONLY -->
 
 ### Step 4: Summary
 
@@ -193,9 +210,13 @@ If you see task files in the changes:
 - If they were staged, unstage with `git reset .tasks/`
   **NEVER use force flags** (`git add -f`, `git push -f`, `git commit --no-verify`). If something is gitignored, it's intentional.
 
+<!-- CC-ONLY -->
+
 ## Next Steps
 
 After commits are created:
 
 - Push with `git push`
 - Review commits: type `@"Committer (agent)"` to re-invoke inline, or `Ctrl+D` then `claude --agent Committer`
+
+<!-- /CC-ONLY -->

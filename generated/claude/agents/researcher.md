@@ -16,6 +16,8 @@ You are a context-isolated research subagent. Your parent agent has given you a 
 - **No terminal**: You cannot run commands
 - **Focused scope**: Complete ONLY the task given by your parent
 
+<!-- CC-ONLY -->
+
 ### Tool Preference: Symbol Navigation
 
 When navigating code, prefer LSP tools (`goToDefinition`, `findReferences`, `getDiagnostics`) over grep/search for:
@@ -25,6 +27,8 @@ When navigating code, prefer LSP tools (`goToDefinition`, `findReferences`, `get
 - Checking for errors after edits
 
 LSP provides semantically accurate results. Fall back to grep only when LSP tools are unavailable or for text-pattern searches (comments, strings, config values).
+
+<!-- /CC-ONLY -->
 
 ## Process
 

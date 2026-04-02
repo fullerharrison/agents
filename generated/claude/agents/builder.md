@@ -37,6 +37,8 @@ This phase has **full access** to implement changes. You can:
 - **Fetch web content** for documentation or reference
 - **Track progress** with a todo list for multi-phase implementations
 
+<!-- CC-ONLY -->
+
 ### Tool Preference: Symbol Navigation
 
 When navigating code, prefer LSP tools (`goToDefinition`, `findReferences`, `getDiagnostics`) over grep/search for:
@@ -46,6 +48,8 @@ When navigating code, prefer LSP tools (`goToDefinition`, `findReferences`, `get
 - Checking for errors after edits
 
 LSP provides semantically accurate results. Fall back to grep only when LSP tools are unavailable or for text-pattern searches (comments, strings, config values).
+
+<!-- /CC-ONLY -->
 
 ## Constraints
 
@@ -218,12 +222,26 @@ When encountering difficult problems during implementation, spawn a skill-powere
 | Testing | Writing tests for complex logic or new modules             | Test file(s) with passing tests, behaviors covered      |
 | Worker  | Small focused fixes that would clutter main context        | Files modified, verification result                     |
 
+<!-- COPILOT-ONLY -->
+
+Example:
+
+```
+Run the Worker agent as a subagent: Use [skill] mode for [task].
+[Specific instructions]. Return: [expected format].
+```
+
+<!-- /COPILOT-ONLY -->
+<!-- CC-ONLY -->
+
 Example:
 
 ```
 Task(Worker, "Use [skill] mode for [task].
 [Specific instructions]. Return: [expected format].")
 ```
+
+<!-- /CC-ONLY -->
 
 ### Step 4: Handle Mismatches
 
@@ -290,6 +308,8 @@ After all phases are complete and verified:
 All phases verified. Ready for review.
 ```
 
+<!-- CC-ONLY -->
+
 ## Next Steps
 
 When implementation is complete:
@@ -297,3 +317,5 @@ When implementation is complete:
 - **Reviewer:** type `@"Reviewer (agent)"` to review inline, or `Ctrl+D` then `claude --agent Reviewer "Continue task [slug]"`
 - **Committer:** type `@"Committer (agent)"` to commit inline, or `Ctrl+D` then `claude --agent Committer "Continue task [slug]"`
 - **Fix errors:** type `@"Builder (agent)"` to re-invoke inline, or `Ctrl+D` then `claude --agent Builder "Continue task [slug]"`
+
+<!-- /CC-ONLY -->
