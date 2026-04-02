@@ -89,11 +89,24 @@ Identify what parts of the system are affected:
 
 For deeper investigation, delegate to Explorer:
 
+<!-- COPILOT-ONLY -->
+
+```
+Run the Explorer agent as a subagent to investigate the code areas affected by: [description].
+Focus on: dependencies, test coverage, integration points.
+Return: affected files, dependency count, test coverage status.
+```
+
+<!-- /COPILOT-ONLY -->
+<!-- CC-ONLY -->
+
 ```
 Task(Explorer, "Investigate the code areas affected by: [description].
 Focus on: dependencies, test coverage, integration points.
 Return: affected files, dependency count, test coverage status.")
 ```
+
+<!-- /CC-ONLY -->
 
 ### Step 4: Score and Classify
 

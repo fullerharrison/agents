@@ -15,7 +15,7 @@ tools:
     "web",
     "todo",
   ]
-model: ["Claude Opus 4.6 (copilot)"]
+model: opus
 agents: ["Explorer", "Researcher"]
 handoffs:
   - label: Builder
@@ -60,6 +60,20 @@ You can:
 - **Fetch web content** for documentation or reference materials
 - **Spawn subagents** for parallel investigation of independent areas
 - **Track progress** with a todo list for complex research
+
+<!-- CC-ONLY -->
+
+### Tool Preference: Symbol Navigation
+
+When navigating code, prefer LSP tools (`goToDefinition`, `findReferences`, `getDiagnostics`) over grep/search for:
+
+- Finding function/class definitions
+- Locating all references to a symbol
+- Checking for errors after edits
+
+LSP provides semantically accurate results. Fall back to grep only when LSP tools are unavailable or for text-pattern searches (comments, strings, config values).
+
+<!-- /CC-ONLY -->
 
 **NEVER invoke the Builder subagent.** The user controls when to move to implementation. Your job is to research and plan, then wait for user direction.
 
@@ -195,6 +209,8 @@ For complex research spanning 3+ independent areas or requiring 50+ file reads, 
 
 **Subagents:** Explorer (deep codebase tracing), Researcher (external docs, semantic analysis). **Skills:** Architecture (system structure), Deep-Research (exhaustive investigation with citations).
 
+<!-- COPILOT-ONLY -->
+
 ```
 # Subagent for codebase tracing
 Run the Explorer agent as a subagent to [task]. Return: [format].
@@ -202,6 +218,19 @@ Run the Explorer agent as a subagent to [task]. Return: [format].
 # Skill-powered subagent
 Use the Researcher agent in a subagent: Use [skill] mode to [task]. Return: [format].
 ```
+
+<!-- /COPILOT-ONLY -->
+<!-- CC-ONLY -->
+
+> **Note:** Task() calls require main-thread context. When Explorer runs as a
+> subagent of Conductor, Task() is unavailable (CC's one-level nesting limit).
+
+```
+Task(Explorer, "[task]. Return: [format].")
+Task(Researcher, "Use [skill] mode to [task]. Return: [format].")
+```
+
+<!-- /CC-ONLY -->
 
 Subagents return only their final summary. Incorporate into your synthesis.
 
@@ -356,4 +385,18 @@ Before completing this session, verify:
 3. **Save work**: Is your research saved to `.tasks/[NNN]-[slug]/task.md`?
 4. **No auto-handoff**: Did you invoke the Builder subagent? If yes, STOP—the user controls when to move to implementation.
 
+<!-- COPILOT-ONLY -->
+
 **→ Next step**: Save and wait for user direction. Use the "Builder" handoff button only when the user is ready.
+
+<!-- /COPILOT-ONLY -->
+<!-- CC-ONLY -->
+
+## Next Steps
+
+When this agent's work is complete:
+
+- **Same session:** type `@"Builder (agent)"` to delegate to Builder inline
+- **New session:** `Ctrl+D`, then `claude --agent Builder "Continue task [slug]"`
+
+<!-- /CC-ONLY -->
