@@ -85,7 +85,7 @@ Conductor automates multi-phase workflows with pause points for user approval.
 | **Releaser**  | Changelogs, versions, tags    | Edit + Terminal   | Reviewer, Committer        |
 | **Analyst**   | Knowledge base management     | Read + Write      | Explorer, Researcher       |
 
-**Internal agents (not user-invokable):** Researcher (read + web), Worker (full access) — used by other agents for context-isolated subtasks.
+**Internal agent (not user-invokable):** Researcher (read + web) — used by other agents for context-isolated subtasks.
 
 **Task Write**: Explorer can only write to `.tasks/` directory—not your codebase.
 
@@ -256,7 +256,7 @@ Add MCP tools that get merged into agent definitions during generation:
 | `agentTools.<platform>.<agent>` | `string[]` | Tools added to a **specific** agent only        |
 
 **Platforms:** `copilot`, `cc`
-**Agent names:** `builder`, `committer`, `conductor`, `explorer`, `researcher`, `reviewer`, `worker`
+**Agent names:** `builder`, `committer`, `conductor`, `explorer`, `researcher`, `reviewer`
 
 Both fields are optional — omit them or leave arrays empty for no extra tools.
 
@@ -353,7 +353,7 @@ Explorer persists state to `.tasks/[NNN]-[task-name]/`:
 | Agent        | Reads                   | Updates                              |
 | ------------ | ----------------------- | ------------------------------------ |
 | **Explorer** | `task.md`, `plan/*.md`  | `task.md`, `plan/*.md`, phase status |
-| **Builder**  | Phase plan or `task.md` | Phase status (⬜→📋→🔄→✅)               |
+| **Builder**  | Phase plan or `task.md` | Phase status (⬜→📋→🔄→✅)           |
 | **Reviewer** | All plan + implement    | —                                    |
 
 **To continue a task**: Just say "Continue working on [task-name]"

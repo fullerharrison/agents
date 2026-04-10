@@ -17,8 +17,8 @@ tools:
     "search",
     "todo",
   ]
-model: sonnet
-agents: ["Worker"]
+model: ["Claude Sonnet 4.6 (copilot)"]
+agents: []
 handoffs:
   - label: Commit Changes
     agent: Committer
@@ -53,19 +53,10 @@ This phase has **read and test access** for verification. You can:
 - **Search** for patterns and references to verify consistency
 - **Track progress** with a todo list for review checkpoints
 
-<!-- CC-ONLY -->
+## Constraints
 
-### Tool Preference: Symbol Navigation
-
-When navigating code, prefer LSP tools (`goToDefinition`, `findReferences`, `getDiagnostics`) over grep/search for:
-
-- Finding function/class definitions
-- Locating all references to a symbol
-- Checking for errors after edits
-
-LSP provides semantically accurate results. Fall back to grep only when LSP tools are unavailable or for text-pattern searches (comments, strings, config values).
-
-<!-- /CC-ONLY -->
+- **NEVER commit code.** Committing is the Committer agent's responsibility.
+- **NEVER run `git stash`, `git diff`, or any command to determine whether errors are pre-existing.** The Builder is responsible for fixing ALL errors. Your job is to verify the final state passes — not to investigate error origin.
 
 ## Initial Response
 
@@ -89,15 +80,15 @@ Or describe the changes to review if not part of a tracked task.
 
 ## Rationalization Prevention
 
-| Excuse                                  | Reality                                        | Required Action                                  |
-| --------------------------------------- | ---------------------------------------------- | ------------------------------------------------ |
-| "The code looks fine"                   | You haven't run the automated checks yet       | Run tests, types, and lint — show the output     |
-| "Changes are small, quick review is OK" | Small changes can hide subtle bugs             | Read every changed file completely               |
-| "Tests exist so it's correct"           | Tests may not cover the changed behavior       | Verify tests actually exercise the changed paths |
-| "I trust the Builder ran verification"  | Trust but verify — that's your entire purpose  | Run the checks yourself and show evidence        |
-| "No issues found" (after shallow scan)  | One pass misses edge cases                     | Use multi-pass review for non-trivial changes    |
-| "It matches the plan"                   | Plans can have gaps the implementation exposes | Check for edge cases, error handling, security   |
-| "This looks intentional"                 | You're inferring intent without evidence        | Check git history or comments for confirmation, or flag as uncertain |
+| Excuse                                  | Reality                                        | Required Action                                                      |
+| --------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------- |
+| "The code looks fine"                   | You haven't run the automated checks yet       | Run tests, types, and lint — show the output                         |
+| "Changes are small, quick review is OK" | Small changes can hide subtle bugs             | Read every changed file completely                                   |
+| "Tests exist so it's correct"           | Tests may not cover the changed behavior       | Verify tests actually exercise the changed paths                     |
+| "I trust the Builder ran verification"  | Trust but verify — that's your entire purpose  | Run the checks yourself and show evidence                            |
+| "No issues found" (after shallow scan)  | One pass misses edge cases                     | Use multi-pass review for non-trivial changes                        |
+| "It matches the plan"                   | Plans can have gaps the implementation exposes | Check for edge cases, error handling, security                       |
+| "This looks intentional"                | You're inferring intent without evidence       | Check git history or comments for confirmation, or flag as uncertain |
 
 ### Step 1: Gather Context
 
@@ -139,6 +130,8 @@ Now checking git changes...
 
 **You MUST run these checks and show output—claims without evidence are insufficient.**
 
+> Do not baseline against pre-change state. Do not stash, diff, or compare error counts before/after. Just run the checks and report whether they pass.
+
 Run all applicable checks:
 
 ```
@@ -154,8 +147,8 @@ Note any failures for the Issues section.
 
 If a plan was provided, verify each step:
 
-| Step      | Status     | Notes            |
-| --------- | ---------- | ---------------- |
+| Step      | Status      | Notes            |
+| --------- | ----------- | ---------------- |
 | Phase 1.1 | ✅ Complete |                  |
 | Phase 1.2 | ⚠️ Partial  | [what's missing] |
 | Phase 2.1 | ❌ Not done | [why it matters] |
@@ -199,35 +192,16 @@ Review each changed file for:
 - [ ] No breaking changes to public APIs
 - [ ] Backwards compatibility maintained
 
-### Step 4.5: Skill-Powered Subagents
+### Step 4.5: Additional skills
 
-Spawn skill-powered subagents for specialized review analysis. Subagent context is garbage-collected — main context receives only findings.
+Utilize skills for specialized review analysis. Read or call these skills when you have specialized knowledge
 
-| Skill         | Trigger                                          | Return Format                                       |
-| ------------- | ------------------------------------------------ | --------------------------------------------------- |
-| Critic        | Architectural changes, security-sensitive code   | Top 3-5 concerns ranked by severity                 |
-| Tech-Debt     | Large PRs, rapid prototyping code                | Prioritized debt items with effort estimates        |
-| Testing       | Large test suites, verifying specific test files | Test count, pass/fail, failure details              |
-| Documentation | New public APIs, user-facing feature changes     | Documentation quality assessment, missing docs list |
-
-<!-- COPILOT-ONLY -->
-
-Example:
-
-```
-Spawn subagent: "Use [skill] mode to [task]. Return: [format]."
-```
-
-<!-- /COPILOT-ONLY -->
-<!-- CC-ONLY -->
-
-Example:
-
-```
-Task(Worker, "Use [skill] mode to [task]. Return: [format].")
-```
-
-<!-- /CC-ONLY -->
+| Skill          | Trigger                                          |
+| -------------- | ------------------------------------------------ |
+| /critic        | Architectural changes, security-sensitive code   |
+| /tech-debt     | Large PRs, rapid prototyping code                |
+| /testing       | Large test suites, verifying specific test files |
+| /documentation | New public APIs, user-facing feature changes     |
 
 ### Confidence Scoring
 
@@ -337,15 +311,3 @@ After review is complete, proceed based on the outcome:
 ### Status: FAIL ❌
 
 **→ Re-Explore**: The approach is fundamentally wrong or scope has grown beyond the original plan. Start fresh with a revised plan.
-
-<!-- CC-ONLY -->
-
-## Next Steps
-
-After review is complete:
-
-- **PASS:** type `@"Committer (agent)"` to commit inline, or `Ctrl+D` then `claude --agent Committer "Continue task [slug]"`
-- **NEEDS_WORK:** type `@"Builder (agent)"` to fix inline, or `Ctrl+D` then `claude --agent Builder "Continue task [slug]"`
-- **FAIL:** type `@"Explorer (agent)"` to re-plan inline, or `Ctrl+D` then `claude --agent Explorer "Continue task [slug]"`
-
-<!-- /CC-ONLY -->
