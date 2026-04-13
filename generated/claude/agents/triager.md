@@ -89,24 +89,11 @@ Identify what parts of the system are affected:
 
 For deeper investigation, delegate to Explorer:
 
-<!-- COPILOT-ONLY -->
-
-```
-Run the Explorer agent as a subagent to investigate the code areas affected by: [description].
-Focus on: dependencies, test coverage, integration points.
-Return: affected files, dependency count, test coverage status.
-```
-
-<!-- /COPILOT-ONLY -->
-<!-- CC-ONLY -->
-
 ```
 Task(Explorer, "Investigate the code areas affected by: [description].
 Focus on: dependencies, test coverage, integration points.
 Return: affected files, dependency count, test coverage status.")
 ```
-
-<!-- /CC-ONLY -->
 
 ### Step 4: Score and Classify
 
@@ -149,6 +136,19 @@ Return: affected files, dependency count, test coverage status.")
 | **P2** | 5–19 | Backlog — do when capacity allows |
 | **P3** | <5 | Icebox — revisit quarterly |
 
+#### Environment Recommendation
+
+Match the task's primary activity to an environment profile (see Project Management Conventions → Environment Profiles):
+
+| Primary Activity | Recommended Env |
+|---|---|
+| Orchestration, multi-agent research, planning | cloud |
+| Shell scripting, builds, test runs, git-heavy | cli |
+| Single-file edits, docs, config, small fixes | local |
+| Mixed or unclear | any |
+
+When uncertain, default to `any`.
+
 ### Step 5: Produce Triage Report
 
 Output a structured assessment:
@@ -163,6 +163,7 @@ Output a structured assessment:
 - **Type**: [Bug | Feature | Enhancement | Tech Debt | Research]
 - **Severity**: [S0–S3] (bugs only)
 - **Priority**: [P0–P3] (RICE: [score])
+- **Recommended Environment**: [cloud | cli | local | any]
 
 ### RICE Breakdown
 | Factor | Score | Rationale |
@@ -193,7 +194,7 @@ For items that are clearly simple (single-file bug fixes, typos, config changes)
 
 ```markdown
 ## Quick Triage: [Title]
-**Type**: [type] | **Priority**: P[N] | **Size**: [XS|S]
+**Type**: [type] | **Priority**: P[N] | **Size**: [XS|S] | **Env**: [env]
 **Route**: → [Agent] — [reason]
 ```
 
@@ -211,11 +212,11 @@ When triaging multiple items at once:
 ```markdown
 ## Batch Triage Summary
 
-| # | Request | Type | Priority | Size | Route |
-|---|---------|------|----------|------|-------|
-| 1 | [title] | Bug | P1 | S | Conductor |
-| 2 | [title] | Feature | P2 | L | Planner |
-| 3 | [title] | Duplicate of 001-auth | — | — | Skip |
+| # | Request | Type | Priority | Size | Env | Route |
+|---|---------|------|----------|------|-----|-------|
+| 1 | [title] | Bug | P1 | S | cli | Conductor |
+| 2 | [title] | Feature | P2 | L | cloud | Planner |
+| 3 | [title] | Duplicate of 001-auth | — | — | — | Skip |
 ```
 
 ## Integration Points
