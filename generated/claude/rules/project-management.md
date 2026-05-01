@@ -49,6 +49,17 @@ Format: `[NNN]-[slug]`
 | **L** | High | Cross-cutting, significant unknowns, 1-3 days |
 | **XL** | Very high | Architecture-level, research needed, 3+ days |
 
+## Environment Profiles
+
+Target environments for task dispatch. Used in `target-env` frontmatter and Triager recommendations.
+
+| Env | Best For | Typical Capabilities |
+|---|---|---|
+| **cloud** | Orchestration, research, planning, long-context | Full agent team, web access, large context windows |
+| **cli** | Bash, git, file I/O, test running | Terminal, file system, build tools |
+| **local** | Quick transforms, docs, low-context | IDE integration, file editing, local search |
+| **any** | No preference — first available | Varies by actual environment |
+
 ## Cross-References
 
 When linking between task files:
@@ -68,6 +79,63 @@ When linking between task files:
 | 3 | [Phase name] | [M] | ✅ Done |
 ```
 
+## Dispatch Metadata
+
+Optional metadata in `task.md` for multi-environment task dispatch. Used by Conductor (claim/release), Explorer (initial creation), and `a-queue` (scanning).
+
+### Frontmatter Field
+
+Add `target-env` to task.md frontmatter:
+
+```yaml
+---
+task: Example Task
+slug: example-task
+created: 2026-04-10
+status: planning
+target-env: cli          # cloud | cli | local | any (default: any)
+---
+```
+
+When omitted, `target-env` defaults to `any`.
+
+### Dispatch Section
+
+Place below the phase table in `task.md`:
+
+```markdown
+## Dispatch
+
+| Field | Value |
+|---|---|
+| Target | cli |
+| Claimed-By | — |
+| Claimed-At | — |
+| Status | unclaimed |
+```
+
+**Fields:**
+
+- **Target** — mirrors `target-env` frontmatter (convenience for scanning). _The `target-env` frontmatter field is the source of truth. `Target` in the Dispatch table is a convenience mirror for readability._
+- **Claimed-By** — freeform identifier set by the claiming Conductor (hostname, env label, etc.). `—` when unclaimed
+- **Claimed-At** — ISO 8601 timestamp. `—` when unclaimed
+- **Status** — dispatch lifecycle state (see below). _Not to be confused with the `status` frontmatter field, which tracks the task lifecycle (planning → in-progress → done). The Dispatch Status tracks the claim lifecycle._
+
+### Dispatch Status Lifecycle
+
+```
+unclaimed → claimed → active → released
+```
+
+| Status | Meaning |
+|---|---|
+| **unclaimed** | Default — no environment has claimed the task. Section absent = unclaimed |
+| **claimed** | An environment has reserved the task but hasn't started the phase loop |
+| **active** | Conductor is executing the phase loop |
+| **released** | Conductor finished all phases or explicitly released the claim |
+
+Claims are **advisory** — file-write-based, not locks. Git merge conflicts surface races between environments.
+
 ## User Story Format
 
 ```markdown
@@ -86,7 +154,7 @@ When linking between task files:
 
 ```
 .tasks/[NNN]-[slug]/
-  task.md                          # Research + phase table (required)
+  task.md                          # Research + phase table + dispatch (required)
   roadmap.md                       # Project-level plan (if Planner created)
   backlog.md                       # Priority-ordered items (if Planner created)
   stories/
@@ -95,4 +163,3 @@ When linking between task files:
     phase-1-[name].md              # Detailed phase plans
     phase-2-[name].md
   retro.md                         # Retrospective notes (if reviewed)
-```

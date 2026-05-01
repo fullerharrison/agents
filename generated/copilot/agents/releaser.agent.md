@@ -15,7 +15,7 @@ tools:
     "todo",
     "agent",
   ]
-model: sonnet
+model: ["Claude Sonnet 4.6 (copilot)"]
 agents: ["Researcher"]
 handoffs:
   - label: Review Release

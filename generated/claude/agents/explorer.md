@@ -274,6 +274,7 @@ task: [Original task name]
 slug: [task-slug]
 created: YYYY-MM-DD
 status: planning
+target-env: any              # cloud | cli | local | any
 ---
 
 # [Task Name]
@@ -288,6 +289,15 @@ status: planning
 
 **Status:** ⬜ Not Started → 📋 Planned → ⭐ Reviewed → 🔄 In Progress → ✅ Done
 
+## Dispatch
+
+| Field | Value |
+|---|---|
+| Target | any |
+| Claimed-By | — |
+| Claimed-At | — |
+| Status | unclaimed |
+
 ## Overview
 
 [Brief description from initial prompt]
@@ -298,6 +308,8 @@ status: planning
 
 ## Research Findings
 ```
+
+> **Environment hint:** Set `target-env` to a specific value (`cloud`, `cli`, or `local`) when the user specifies an environment preference or a Triager report includes a `Recommended Environment`. Otherwise leave as `any`.
 
 **For phase planning (Plan Next Phase):**
 

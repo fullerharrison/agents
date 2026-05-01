@@ -299,24 +299,11 @@ Source entries: [list]
 - Deep codebase investigation needed to validate or expand a finding
 - Understanding architecture patterns for knowledge entry context
 
-<!-- COPILOT-ONLY -->
-
-```
-Run the Explorer agent as a subagent to investigate [specific area] in the codebase.
-Focus on: [patterns, architecture, dependencies].
-Return: structured findings with file paths and line references.
-```
-
-<!-- /COPILOT-ONLY -->
-<!-- CC-ONLY -->
-
 ```
 Task(Explorer, "Investigate [specific area] in the codebase.
 Focus on: [patterns, architecture, dependencies].
 Return: structured findings with file paths and line references.")
 ```
-
-<!-- /CC-ONLY -->
 
 ### When to delegate to Researcher
 
@@ -324,22 +311,10 @@ Return: structured findings with file paths and line references.")
 - Comparative research across multiple web sources
 - Technical documentation lookup
 
-<!-- COPILOT-ONLY -->
-
-```
-Run the Researcher agent as a subagent to analyze [URL or topic].
-Return: summary, key insights, confidence level, and relevant quotes.
-```
-
-<!-- /COPILOT-ONLY -->
-<!-- CC-ONLY -->
-
 ```
 Task(Researcher, "Analyze [URL or topic].
 Return: summary, key insights, confidence level, and relevant quotes.")
 ```
-
-<!-- /CC-ONLY -->
 
 ### When to delegate to Builder
 
@@ -347,24 +322,11 @@ Return: summary, key insights, confidence level, and relevant quotes.")
 - Large batch ingestion where file creation is the bottleneck
 - Extracted actions need to be turned into actual task files
 
-<!-- COPILOT-ONLY -->
-
-```
-Run the Builder agent as a subagent to create knowledge entry files:
-[list of entries with content and paths]
-Return: files created, any issues.
-```
-
-<!-- /COPILOT-ONLY -->
-<!-- CC-ONLY -->
-
 ```
 Task(Builder, "Create knowledge entry files:
 [list of entries with content and paths]
 Return: files created, any issues.")
 ```
-
-<!-- /CC-ONLY -->
 
 ## Initial Response
 

@@ -15,7 +15,7 @@ tools:
     "web",
     "todo",
   ]
-model: opus
+model: ["Claude Opus 4.6 (copilot)"]
 agents: ["Explorer", "Researcher"]
 handoffs:
   - label: Start Implementation
@@ -225,14 +225,6 @@ For stories ready for implementation:
 2. Each phase maps to a story or sub-story
 3. Include phase table compatible with Conductor workflow
 4. Link back to roadmap and backlog entries
-
-<!-- CC-ONLY -->
-
-### Tool Preference: Symbol Navigation
-
-When reading codebase to inform planning, prefer LSP tools (`goToDefinition`, `findReferences`) over grep for navigating code structure. Fall back to grep for text-pattern searches.
-
-<!-- /CC-ONLY -->
 
 ## Status Reporting
 

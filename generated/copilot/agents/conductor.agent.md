@@ -258,6 +258,98 @@ Call `AskUserQuestion` with these options:
 
 ---
 
+### Step 1c: Check & Claim Dispatch
+
+**Trigger:** Task resolved (new or existing). Runs before entering Step 2 (Phase Loop).
+
+**Plan-Only Mode:** Skip Step 1c entirely — planning doesn't modify shared files and doesn't require exclusive claim.
+
+Read the `## Dispatch` section from `.tasks/[slug]/task.md`. If the section is absent, skip this step — the task predates dispatch metadata.
+
+**Dispatch Status handling:**
+
+| Dispatch Status | Action |
+|---|---|
+| `unclaimed` (or section absent) | Claim the task (see Claim Protocol below) |
+| `active`, **same** Claimed-By | Normal resume — already claimed by this environment |
+| `active`, **different** Claimed-By | WARN checkpoint (see below) |
+| `released` | Re-claim the task (previous Conductor finished) |
+
+> **Stale claims:** A Dispatch section showing `active` with no `task.md` updates for >24 hours should be treated as implicitly released. This requirement is implemented by `a-queue` in Phase 5.
+
+#### Claim Protocol
+
+Invoke Builder to write the claim:
+
+<!-- COPILOT-ONLY -->
+
+```
+Run the Builder agent as a subagent to update dispatch metadata in .tasks/[slug]/task.md:
+1. In the ## Dispatch table, set:
+   - Claimed-By: [env-label]
+   - Claimed-At: [current ISO timestamp]
+   - Status: active
+2. Do NOT change any other content in the file.
+Return: confirmation of fields written.
+```
+
+<!-- /COPILOT-ONLY -->
+<!-- CC-ONLY -->
+
+```
+Task(Builder, "Update dispatch metadata in .tasks/[slug]/task.md:
+1. In the ## Dispatch table, set:
+   - Claimed-By: [env-label]
+   - Claimed-At: [current ISO timestamp]
+   - Status: active
+2. Do NOT change any other content in the file.
+Return: confirmation of fields written.")
+```
+
+<!-- /CC-ONLY -->
+
+**Environment label:** On first claim in a session, ask the user:
+
+<!-- COPILOT-ONLY -->
+
+Call `askQuestions`: "What environment label should I use for dispatch claims? (e.g., cloud-macbook, cli-terminal-1)"
+- Provide the `target-env` value from frontmatter as the default option.
+
+<!-- /COPILOT-ONLY -->
+<!-- CC-ONLY -->
+
+Call `AskUserQuestion`: "What environment label should I use for dispatch claims? (e.g., cloud-macbook, cli-terminal-1)"
+- Suggest the `target-env` value from frontmatter as the default.
+
+<!-- /CC-ONLY -->
+
+Cache the label for the rest of the session — do not re-ask on every phase.
+
+#### Conflict Warning
+
+If a different environment already holds the claim:
+
+<!-- COPILOT-ONLY -->
+
+Call `askQuestions`:
+
+<!-- /COPILOT-ONLY -->
+<!-- CC-ONLY -->
+
+Call `AskUserQuestion`:
+
+<!-- /CC-ONLY -->
+
+"⚠️ Task claimed by **[Claimed-By]** at [Claimed-At] (status: [Status]). This may indicate another environment is actively working on it."
+
+- [Override] Override claim and proceed (will write new claim)
+- [Pick Different Task] Return to task selection
+- [Abort] Stop workflow
+
+On **Override**: Proceed with Claim Protocol (overwrites existing claim). On **Pick Different Task**: Return to First Action Protocol. On **Abort**: End session.
+
+---
+
 ### Step 2: Phase Loop
 
 For each phase (starting with next ⬜ Not Started):
@@ -653,12 +745,38 @@ Return: confirmation.")
 
 When all phases are ✅ Done:
 
-- Show final summary
-- List all commits created across phases
-- Show ADR created/updated (if any)
-- Suggest: `git push` to push all commits to remote
-- Suggest: "Prepare Release" to hand off to Releaser for changelog + versioning
-- Suggest: "Run Retrospective" to analyze what went well and what to improve
+1. **Release dispatch claim:** Invoke Builder to update `.tasks/[slug]/task.md`:
+
+<!-- COPILOT-ONLY -->
+
+```
+Run the Builder agent as a subagent to update dispatch metadata in .tasks/[slug]/task.md:
+1. In the ## Dispatch table, set Status to: released
+2. Do NOT change Claimed-By or Claimed-At fields.
+3. Do NOT change any other content in the file.
+Return: confirmation.
+```
+
+<!-- /COPILOT-ONLY -->
+<!-- CC-ONLY -->
+
+```
+Task(Builder, "Update dispatch metadata in .tasks/[slug]/task.md:
+1. In the ## Dispatch table, set Status to: released
+2. Do NOT change Claimed-By or Claimed-At fields.
+3. Do NOT change any other content in the file.
+Return: confirmation.")
+```
+
+<!-- /CC-ONLY -->
+
+2. Show final summary
+3. List all commits created across phases
+4. Show ADR created/updated (if any)
+5. Show dispatch release confirmation
+6. Suggest: `git push` to push all commits to remote
+7. Suggest: "Prepare Release" to hand off to Releaser for changelog + versioning
+8. Suggest: "Run Retrospective" to analyze what went well and what to improve
 
 ### Optional: Pre-Workflow Triage
 
@@ -713,15 +831,15 @@ When resuming, read task.md and infer position from phase status:
 ### Resume Flow
 
 1. Read `.tasks/[slug]/task.md` for phase status
-<!-- COPILOT-ONLY -->
-2. Check for uncommitted work: ask Worker to run `git status --porcelain` and report results
-
-<!-- /COPILOT-ONLY -->
-<!-- CC-ONLY -->
-
-2. Check for uncommitted work: `Task(Worker, "Run git status --porcelain and report any uncommitted changes")`
-<!-- /CC-ONLY -->
+2. Check for uncommitted work:
+   <!-- COPILOT-ONLY -->
+   - Ask Builder to run `git status --porcelain` as first action if phase is 🔄 In Progress
+   <!-- /COPILOT-ONLY -->
+   <!-- CC-ONLY -->
+   - `Task(Builder, "Run git status --porcelain and report any uncommitted changes")` if phase is 🔄 In Progress
+   <!-- /CC-ONLY -->
+2.5. **Check dispatch state**: Read `## Dispatch` section. Jump to Step 1c above, then return here to continue with step 3. If same env and `active` status, proceed normally (skip Step 1c).
 3. Find first non-Done phase, determine step within it
-4. Show status summary, ask: [Continue] [Show Plan First]
+4. Show status summary (including dispatch state: Claimed-By, Status), ask: [Continue] [Show Plan First]
 
 **Session independence:** Don't assume conversation history — always read task.md fresh and re-derive current step from file state.
